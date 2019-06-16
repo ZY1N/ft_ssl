@@ -11,28 +11,14 @@
 /* ************************************************************************** */
 
 #include "ft_ssl.h"
-
-int		ft_strcmp(const char *s1, const char *s2)
-{
-		int i;
-
-		i = 0;
-		while (s1[i] != '\0' && s2[i] != '\0' && s1[i] == s2[i])
-			i++;
-		return ((unsigned char)s1[i] - (unsigned char)s2[i]);
-}
+#include "./ft_printf/includes/ft_printf.h"
+#include "./ft_printf/includes/libft.h"
 
 /*======================================================================*/
 
-void	error()
-{
-	printf("error try again");
-	exit(-1);
-}
-
 void	ifunknown(char *s)
 {
-	printf("ft_ssl: Error: '%s' is an invalid command.\n\nStandard \
+	ft_printf("ft_ssl: Error: '%s' is an invalid command.\n\nStandard \
 	commands:\n\nMessage Digest commands:\nmd5\nsha256\n\nCipher \
 	commands:\n", s);
 	exit(-1);
@@ -47,20 +33,54 @@ t_algo	findalgo(char *s)
 		return(MD5);
 	else if (ft_strcmp(s, "sha256") == 0)
 		return(SHA256);
-	return(UNKNOWN);
+	return(INVALID);
 }
+
+void	badflagerror()
+{
+	ft_printf("\nAccepted flags: -p -q -r -s\n");
+	exit(-1);
+}
+
+
+void	findflags(char *s, t_flags *options)
+{
+	int i;
+
+	i = 0;
+	options->q = 0;
+	printf("%s", s);
+	if (s[0] == '-')
+	{
+		i++;
+		while (s[i])
+		{
+			if (!ft_strchr("pqrs", s[i]))
+				badflagerror();
+			i++;
+		}
+	}
+
+
+}
+
+
 
 int		main(int argc, char **argv)
 {
-	t_algo a;
+	t_algo algo;
+	t_flags *options;
+	int		n;
 
+	n = argc;
+	options = (t_flags *)malloc(sizeof(t_flags));
 	if (argc > 2)
 	{
-		a = findalgo(argv[1]);
-		if (a == UNKNOWN)
+		algo = findalgo(argv[1]);
+		if (algo == INVALID)
 			ifunknown(argv[1]);
-		
-		driver(argv[1], argv[2]);
+		while (n-- > 0)
+			findflags(argv[n], options);
 	}
 	else 
 		write(1, USAGE, 52);
